@@ -66,7 +66,7 @@ flowchart LR
 ## Inicio rápido
 
 ```bash
-# 1. Crear cluster Atlas siguiendo docs/ATLAS-SETUP.md
+# 1. Crear cluster Atlas siguiendo docs/HANDBOOK.md §1
 # 2. Copiar el connection string al .env
 cp .env.example .env
 # Edita .env: pega tu MONGODB_URI
