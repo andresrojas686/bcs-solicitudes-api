@@ -156,16 +156,20 @@ bash scripts/smoke-api.sh    # Smoke API end-to-end
 
 ## Documentación
 
-| Tema | Ruta |
-|---|---|
-| Setup MongoDB Atlas paso a paso | [`docs/ATLAS-SETUP.md`](docs/ATLAS-SETUP.md) |
-| Estrategia QA (ISTQB) | [`docs/qa/strategy.md`](docs/qa/strategy.md) |
-| Playbook de liderazgo técnico | [`docs/leadership/playbook.md`](docs/leadership/playbook.md) |
-| Política de uso de IA | [`docs/ai-usage/policy.md`](docs/ai-usage/policy.md) |
-| Prompts representativos usados | [`docs/ai-usage/prompts.md`](docs/ai-usage/prompts.md) |
-| Decisiones arquitectónicas (7 ADRs consolidados) | [`docs/decisions.md`](docs/decisions.md) |
-| Historias técnicas Micrositio↔Core | [`docs/stories/`](docs/stories/) (HU-001, HU-002) |
-| Contrato OpenAPI Core Bancario | [`openapi/core-banking.yaml`](openapi/core-banking.yaml) |
+Toda la documentación del proyecto vive en un solo archivo: **[`docs/HANDBOOK.md`](docs/HANDBOOK.md)**. Está dividido en 8 secciones para que cada lector salte a lo que necesita:
+
+| Sección | Tema | Para |
+|---|---|---|
+| [§1](docs/HANDBOOK.md#1--setup-de-mongodb-atlas-paso-a-paso) | Setup de MongoDB Atlas paso a paso | Cualquiera que clone el repo |
+| [§2](docs/HANDBOOK.md#2--decisiones-arquitectónicas) | 7 decisiones arquitectónicas (ADRs consolidados) | Devs y revisores técnicos |
+| [§3](docs/HANDBOOK.md#3--estrategia-de-calidad-istqb) | Estrategia de calidad (ISTQB) | QA, TL |
+| [§4](docs/HANDBOOK.md#4--playbook-de-liderazgo-técnico) | Playbook de liderazgo técnico | TL, hiring manager |
+| [§5](docs/HANDBOOK.md#5--política-de-uso-de-ia-en-el-equipo) | Política de uso de IA | Squad completo, seguridad |
+| [§6](docs/HANDBOOK.md#6--prompts-representativos-usados-con-ia) | 10 prompts representativos usados | Evaluador (evidencia de uso de IA) |
+| [§7](docs/HANDBOOK.md#7--hu-001--consultar-productos-elegibles-para-un-cliente) | Historia técnica HU-001 | Devs, QA |
+| [§8](docs/HANDBOOK.md#8--hu-002--finalizar-solicitud-aprobada-notificando-al-core) | Historia técnica HU-002 | Devs, QA |
+
+Adicionalmente: contrato Mulesoft en [`openapi/core-banking.yaml`](openapi/core-banking.yaml), Swagger del API en `/api/docs` cuando el backend está corriendo.
 
 ## Observabilidad
 
@@ -189,7 +193,7 @@ bash scripts/smoke-api.sh    # Smoke API end-to-end
 
 ## Roadmap (qué dejaría para sprint 2+)
 
-- Migrar `JWT mock` a Keycloak corporativo ([decisión #3](docs/decisions.md#3--jwt-mock-para-la-prueba-vs-keycloak) documenta el plan).
+- Migrar `JWT mock` a Keycloak corporativo ([§2.3 del Handbook](docs/HANDBOOK.md#23--jwt-mock-vs-keycloak--aceptado-para-la-prueba-reemplazable-en-sprint-1-productivo) documenta el plan).
 - Cache de `productos-elegibles` a Redis (actualmente in-memory, no escala multi-instancia).
 - Job de retry diferido para solicitudes en `APPROVED + pendienteEnvioCore=true`.
 - Mutation testing con Stryker en `estado-solicitud.vo`.
