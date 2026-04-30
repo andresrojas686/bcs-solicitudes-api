@@ -1,0 +1,445 @@
+openapi: 3.1.0
+info:
+  title: BCS Core Banking — Mulesoft API Gateway
+  version: 1.0.0
+  summary: Contrato del API gateway de Mulesoft frente al Core Bancario de BCS.
+  description: |
+    Este contrato define la superficie expuesta por el API gateway de Mulesoft
+    para que la plataforma de **solicitudes digitales** consulte clientes,
+    productos elegibles y orqueste apertura/cancelación de productos en el Core.
+
+    **En esta prueba técnica** el contrato se sirve mediante un mock Express
+    (`bcs-core-mock`) que retorna respuestas determinísticas indexadas por
+    número de documento. En producción, la URL base apuntaría al gateway real
+    (p.ej. `https://api.mulesoft.bcs.co/core-banking/v1`).
+
+    Convenciones:
+    - **Errores**: RFC 7807 (`application/problem+json`).
+    - **Correlation**: header `X-Correlation-Id` propagado en request y response.
+    - **Idempotencia**: header `Idempotency-Key` obligatorio en mutaciones.
+    - **Seguridad**: Bearer JWT firmado por el IdP corporativo (mockeado en la prueba).
+
+  contact:
+    name: Equipo Líder Técnico — BCS
+    email: lider-tecnico@bcs.example
+  license:
+    name: Proprietary
+    url: https://bcs.example/legal
+
+servers:
+  - url: http://localhost:4001
+    description: Mock local (bcs-core-mock)
+  - url: https://api.mulesoft.bcs.co/core-banking/v1
+    description: Producción (no expuesto en esta prueba — referencia)
+
+tags:
+  - name: Clientes
+    description: Consulta de información del cliente desde el Core.
+  - name: Productos
+    description: Consulta del catálogo y reglas de elegibilidad.
+  - name: Solicitudes
+    description: Orquestación de apertura y cancelación de productos.
+  - name: Health
+    description: Probes de disponibilidad del gateway.
+
+security:
+  - BearerJWT: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: []
+      responses:
+        '200':
+          description: Servicio operativo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /core/v1/clientes/{tipoDoc}/{numDoc}:
+    get:
+      tags: [Clientes]
+      summary: Consultar datos básicos y KYC del cliente.
+      operationId: consultarCliente
+      parameters:
+        - $ref: '#/components/parameters/TipoDocPath'
+        - $ref: '#/components/parameters/NumDocPath'
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+      responses:
+        '200':
+          description: Cliente encontrado.
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationIdResponse'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+              examples:
+                kycAprobado:
+                  summary: Cliente con KYC aprobado (doc 1111111111)
+                  value:
+                    tipoDoc: CC
+                    numDoc: '1111111111'
+                    nombres: Ana María
+                    apellidos: García López
+                    contacto:
+                      email: ana@example.com
+                      telefono: '+5730000001'
+                    kycStatus: APROBADO
+                kycPendiente:
+                  summary: Cliente con KYC pendiente (doc 2222222222)
+                  value:
+                    tipoDoc: CC
+                    numDoc: '2222222222'
+                    nombres: Carlos
+                    apellidos: Pérez Ruiz
+                    contacto:
+                      email: carlos@example.com
+                      telefono: '+5730000002'
+                    kycStatus: PENDIENTE
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /core/v1/clientes/{tipoDoc}/{numDoc}/productos-elegibles:
+    get:
+      tags: [Clientes, Productos]
+      summary: Listar productos para los que el cliente es elegible.
+      description: |
+        Aplica reglas de segmentación y KYC del Core. Un cliente con `kycStatus = PENDIENTE`
+        sólo recibe productos básicos (cuenta de ahorros). Implementa la HU-001.
+      operationId: consultarProductosElegibles
+      parameters:
+        - $ref: '#/components/parameters/TipoDocPath'
+        - $ref: '#/components/parameters/NumDocPath'
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+      responses:
+        '200':
+          description: Lista de productos elegibles (puede estar vacía).
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationIdResponse'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductosElegiblesResponse'
+              examples:
+                tresProductos:
+                  summary: Cliente APROBADO ve 3 productos
+                  value:
+                    clienteNumDoc: '1111111111'
+                    productos:
+                      - codigo: AHO-001
+                        nombre: Cuenta de Ahorros Plus
+                        tipo: CUENTA_AHORROS
+                      - codigo: TC-001
+                        nombre: Tarjeta de Crédito Clásica
+                        tipo: TARJETA_CREDITO
+                      - codigo: LI-001
+                        nombre: Crédito de Libre Inversión
+                        tipo: CREDITO_LIBRE_INVERSION
+                kycPendienteSoloAhorros:
+                  summary: Cliente con KYC PENDIENTE solo ve ahorros
+                  value:
+                    clienteNumDoc: '2222222222'
+                    productos:
+                      - codigo: AHO-001
+                        nombre: Cuenta de Ahorros Plus
+                        tipo: CUENTA_AHORROS
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /core/v1/solicitudes:
+    post:
+      tags: [Solicitudes]
+      summary: Solicitar apertura de producto en el Core.
+      description: |
+        Implementa la HU-002. Se invoca cuando una solicitud transiciona a `APPROVED`
+        en el dominio. Requiere `Idempotency-Key` para evitar aperturas duplicadas
+        en caso de reintentos.
+
+        El Core puede:
+        - **201 Created**: producto abierto, devuelve `numeroProducto`.
+        - **422 Unprocessable Entity**: validación de negocio (ej. cliente no cumple riesgo).
+        - **5xx**: indisponibilidad temporal — el cliente debe reintentar con el mismo `Idempotency-Key`.
+      operationId: solicitarAperturaProducto
+      parameters:
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudCoreRequest'
+            examples:
+              cuentaAhorros:
+                summary: Apertura de cuenta de ahorros
+                value:
+                  cliente:
+                    tipoDoc: CC
+                    numDoc: '1111111111'
+                  productoCodigo: AHO-001
+                  metadata:
+                    canal: MICROSITIO
+                    correlationIdInterno: abc123
+      responses:
+        '201':
+          description: Producto abierto exitosamente.
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationIdResponse'
+            Location:
+              schema: { type: string, example: /core/v1/solicitudes/SOL-12345 }
+              description: Ruta del recurso creado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudCoreResponse'
+              examples:
+                aperturaOk:
+                  value:
+                    numeroProducto: BCS-432198765
+                    estado: ACTIVO
+                    creadoEn: '2025-04-28T14:32:11.123Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: Validación de negocio falla en el Core.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+              examples:
+                riesgo:
+                  value:
+                    type: https://core.bcs/errors/business-validation
+                    title: Unprocessable Entity
+                    status: 422
+                    detail: Cliente no cumple política de riesgo para el producto solicitado
+                    code: CORE-422-RISK
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /core/v1/solicitudes/{id}/abandonar:
+    post:
+      tags: [Solicitudes]
+      summary: Notificar al Core el abandono de una solicitud.
+      operationId: abandonarSolicitud
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Identificador de la solicitud en el Core.
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+      responses:
+        '200':
+          description: Solicitud marcada como abandonada en el Core.
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationIdResponse'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  estado: { type: string, enum: [ABANDONADO] }
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token JWT firmado por el IdP corporativo. En la prueba se simula desde
+        `bcs-solicitudes-api/auth/login` con secret HS256.
+
+  parameters:
+    TipoDocPath:
+      in: path
+      name: tipoDoc
+      required: true
+      schema:
+        $ref: '#/components/schemas/TipoDocumento'
+      example: CC
+    NumDocPath:
+      in: path
+      name: numDoc
+      required: true
+      schema:
+        type: string
+        pattern: '^[0-9]{6,12}$'
+      example: '1111111111'
+    CorrelationIdHeader:
+      in: header
+      name: X-Correlation-Id
+      required: false
+      schema: { type: string }
+      description: ID de correlación para trazabilidad end-to-end. Se propaga si está presente o se genera si falta.
+    IdempotencyKeyHeader:
+      in: header
+      name: Idempotency-Key
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 128 }
+      description: Clave única para evitar duplicación en reintentos.
+
+  headers:
+    CorrelationIdResponse:
+      schema: { type: string }
+      description: Eco del correlation id (request) o uno generado por el gateway.
+
+  schemas:
+    TipoDocumento:
+      type: string
+      enum: [CC, CE, NIT, PAS, TI]
+
+    KycStatus:
+      type: string
+      enum: [APROBADO, PENDIENTE, RECHAZADO]
+
+    TipoProducto:
+      type: string
+      enum: [CUENTA_AHORROS, TARJETA_CREDITO, CREDITO_LIBRE_INVERSION]
+
+    Contacto:
+      type: object
+      required: [email, telefono]
+      properties:
+        email: { type: string, format: email }
+        telefono: { type: string, pattern: '^\\+?[0-9]{7,15}$' }
+
+    Cliente:
+      type: object
+      required: [tipoDoc, numDoc, nombres, apellidos, contacto, kycStatus]
+      properties:
+        tipoDoc: { $ref: '#/components/schemas/TipoDocumento' }
+        numDoc: { type: string }
+        nombres: { type: string }
+        apellidos: { type: string }
+        contacto: { $ref: '#/components/schemas/Contacto' }
+        kycStatus: { $ref: '#/components/schemas/KycStatus' }
+
+    ProductoElegible:
+      type: object
+      required: [codigo, nombre, tipo]
+      properties:
+        codigo: { type: string, example: AHO-001 }
+        nombre: { type: string }
+        tipo: { $ref: '#/components/schemas/TipoProducto' }
+
+    ProductosElegiblesResponse:
+      type: object
+      required: [clienteNumDoc, productos]
+      properties:
+        clienteNumDoc: { type: string }
+        productos:
+          type: array
+          items: { $ref: '#/components/schemas/ProductoElegible' }
+
+    SolicitudCoreRequest:
+      type: object
+      required: [cliente, productoCodigo]
+      properties:
+        cliente:
+          type: object
+          required: [tipoDoc, numDoc]
+          properties:
+            tipoDoc: { $ref: '#/components/schemas/TipoDocumento' }
+            numDoc: { type: string }
+        productoCodigo: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Pares libres de auditoría (canal, correlationId interno, etc.)
+
+    SolicitudCoreResponse:
+      type: object
+      required: [numeroProducto, estado, creadoEn]
+      properties:
+        numeroProducto: { type: string, example: BCS-432198765 }
+        estado: { type: string, enum: [ACTIVO] }
+        creadoEn: { type: string, format: date-time }
+
+    HealthResponse:
+      type: object
+      required: [status, service, ts]
+      properties:
+        status: { type: string, enum: [ok] }
+        service: { type: string }
+        ts: { type: string, format: date-time }
+
+    ProblemDetails:
+      type: object
+      description: Formato de error RFC 7807.
+      required: [type, title, status, detail]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string, format: uri }
+        code: { type: string, description: Código de error específico del dominio. }
+        correlationId: { type: string }
+
+  responses:
+    BadRequest:
+      description: Request inválida (header faltante, body mal formado, etc.).
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    Unauthorized:
+      description: Token ausente, expirado o inválido.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Recurso no encontrado en el Core.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+          examples:
+            clienteNoExiste:
+              value:
+                type: https://core.bcs/errors/not-found
+                title: Not Found
+                status: 404
+                detail: Cliente no existe en el Core
+    InternalServerError:
+      description: Error inesperado en el gateway o Core.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    ServiceUnavailable:
+      description: Indisponibilidad temporal — el cliente debe reintentar con backoff.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+          examples:
+            upstreamDown:
+              value:
+                type: https://core.bcs/errors/upstream-unavailable
+                title: Service Unavailable
+                status: 503
+                detail: Core temporalmente no disponible — reintente
