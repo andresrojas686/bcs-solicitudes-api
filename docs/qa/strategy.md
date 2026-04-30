@@ -216,7 +216,7 @@ Disponible en `.github/ISSUE_TEMPLATE/bug.yml`:
 **Esperado**: HTTP 422 con Problem Details. La solicitud queda en `IN_REVIEW` con `motivoRechazo` poblado. El historial muestra `APPROVED → IN_REVIEW`.
 
 ### CP-003 — Reintento del Core con backoff exponencial
-**Origen**: ADR-0005, smoke adapter
+**Origen**: [decisión #5](../decisions.md#5--retry--circuit-breaker-en-adapter-mulesoft), smoke adapter
 **Tipo**: No-funcional (resiliencia), unit + e2e
 **Pasos**: Llamar `solicitarApertura` con `numDoc=3333333333` (mock falla 503 los primeros 2 intentos).
 **Esperado**: Tras ~1.5s (200ms + 600ms backoff) la llamada eventualmente tiene éxito. Histogram `core_banking_request_duration_seconds` registra la duración total.

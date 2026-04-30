@@ -163,7 +163,7 @@ bash scripts/smoke-api.sh    # Smoke API end-to-end
 | Playbook de liderazgo técnico | [`docs/leadership/playbook.md`](docs/leadership/playbook.md) |
 | Política de uso de IA | [`docs/ai-usage/policy.md`](docs/ai-usage/policy.md) |
 | Prompts representativos usados | [`docs/ai-usage/prompts.md`](docs/ai-usage/prompts.md) |
-| Decisiones arquitectónicas (ADRs) | [`docs/adr/`](docs/adr/) (0001-0007) |
+| Decisiones arquitectónicas (7 ADRs consolidados) | [`docs/decisions.md`](docs/decisions.md) |
 | Historias técnicas Micrositio↔Core | [`docs/stories/`](docs/stories/) (HU-001, HU-002) |
 | Contrato OpenAPI Core Bancario | [`openapi/core-banking.yaml`](openapi/core-banking.yaml) |
 
@@ -189,7 +189,7 @@ bash scripts/smoke-api.sh    # Smoke API end-to-end
 
 ## Roadmap (qué dejaría para sprint 2+)
 
-- Migrar `JWT mock` a Keycloak corporativo (ADR-0003 documenta el plan).
+- Migrar `JWT mock` a Keycloak corporativo ([decisión #3](docs/decisions.md#3--jwt-mock-para-la-prueba-vs-keycloak) documenta el plan).
 - Cache de `productos-elegibles` a Redis (actualmente in-memory, no escala multi-instancia).
 - Job de retry diferido para solicitudes en `APPROVED + pendienteEnvioCore=true`.
 - Mutation testing con Stryker en `estado-solicitud.vo`.

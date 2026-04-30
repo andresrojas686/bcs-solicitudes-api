@@ -1,7 +1,7 @@
 # Política de uso de IA en el equipo
 
 > Versión 1.0 · Aplica a todo el squad de la plataforma de Solicitudes Digitales BCS.
-> Esta política es **complemento** del ADR-0007 — léelos juntos.
+> Esta política es **complemento** de la [decisión #7 sobre uso de IA](../decisions.md#7--uso-de-ia-en-desarrollo-política-y-guardrails) — léelos juntos.
 
 ## Principios
 
@@ -42,7 +42,7 @@
 ```
 feat(solicitudes): add idempotency-key support
 
-Implements ADR-0001 idempotency: requests with same key return
+Implements decisions.md #1 idempotency: requests with same key return
 the existing solicitud instead of creating a duplicate.
 
 Closes #42

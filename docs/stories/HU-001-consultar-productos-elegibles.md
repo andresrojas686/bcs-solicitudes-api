@@ -85,7 +85,7 @@ las tarjetas de crédito y créditos quedan filtrados por la regla del Core.
 | Service | `src/modules/auditoria/auditoria.service.ts` |
 | Adapter | `src/modules/solicitudes/infrastructure/core-banking/mulesoft.adapter.ts` |
 | Tests | Smoke `pnpm smoke` (escenarios 1111, 2222, 4444 cubiertos) |
-| ADR relacionado | `docs/adr/0005-retry-circuit-breaker-en-adapter.md` |
+| Decisión relacionada | [`decisions.md` #5 — retry + circuit breaker](../decisions.md#5--retry--circuit-breaker-en-adapter-mulesoft) |
 
 ---
 
@@ -120,4 +120,4 @@ Documentos determinísticos en `bcs-core-mock`:
 ## Loose ends
 
 - Cache es in-memory (per-instance). Para multi-instancia → mover a Redis con misma TTL (ADR de futuro).
-- HMAC opcional de la request al Core (firma del request body): documentado en ADR-0005, deferido a producción real.
+- HMAC opcional de la request al Core (firma del request body): documentado en [decisión #5](../decisions.md#5--retry--circuit-breaker-en-adapter-mulesoft), deferido a producción real.

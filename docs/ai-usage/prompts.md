@@ -123,11 +123,12 @@ Cada entrada incluye: **contexto**, **prompt resumido**, **salida esperada** y *
 **Prompt** (resumido, repetido para cada ADR):
 > ADR-XXX sobre [decisión]. Contexto: [...]. Alternativas que descartamos: [...]. Quiero que la salida sea: contexto, decisión, consecuencias (positivas, negativas, mitigaciones), alternativas consideradas con tabla, plan de evolución si aplica. Pragmático, no académico.
 
-**Salidas**: 7 ADRs en `docs/adr/0001..0007.md`.
+**Salidas**: 7 ADRs originalmente en `docs/adr/0001..0007.md`, posteriormente consolidados en [`docs/decisions.md`](../decisions.md) (un solo documento resumen, ~80-120 palabras por decisión).
 
 **Validación humana**:
-- Cada ADR firmado mentalmente por mí (TL); el contenido refleja decisiones reales tomadas, no documenta teóricas.
+- Cada decisión firmada mentalmente por mí (TL); el contenido refleja decisiones reales tomadas, no documenta teóricas.
 - Tablas de alternativas se ajustaron para reflejar opciones realistas en BCS, no genéricas.
+- Consolidación posterior decidida cuando 7 archivos separados resultaron demasiado volumen para escanear.
 
 ---
 
@@ -136,7 +137,7 @@ Cada entrada incluye: **contexto**, **prompt resumido**, **salida esperada** y *
 **Contexto**: README de cada repo con badges, diagrama Mermaid, inicio rápido, variables de entorno, link a docs.
 
 **Prompt** (resumido):
-> README en español para `bcs-solicitudes-api`. Stack [...], inicio rápido en 3 comandos, link a docs/qa, docs/leadership, docs/adr, docs/stories, docs/ai-usage. Diagrama Mermaid de la arquitectura (Frontend → API → Mongo + Mulesoft). Sección "Limitaciones conocidas" con honestidad.
+> README en español para `bcs-solicitudes-api`. Stack [...], inicio rápido en 3 comandos, link a docs/qa, docs/leadership, docs/decisions, docs/stories, docs/ai-usage. Diagrama Mermaid de la arquitectura (Frontend → API → Mongo + Mulesoft). Sección "Limitaciones conocidas" con honestidad.
 
 **Salida**: README.md de cada repo (B7).
 

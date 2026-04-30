@@ -99,7 +99,7 @@ el cliente reciba el `numeroProducto` generado por el Core, la solicitud quede e
 | Mappers | `src/modules/solicitudes/infrastructure/core-banking/mulesoft.mappers.ts` |
 | Métricas | `src/shared/observability/metrics.service.ts` (`startCoreRequest`) |
 | Tests | `scripts/smoke-api.sh` (CP-002 cubierto end-to-end) + `scripts/smoke-adapter.ts` (CP-003 retry) |
-| ADR relacionado | `docs/adr/0004-maquina-de-estados-en-value-object.md`, `docs/adr/0005-retry-circuit-breaker-en-adapter.md` |
+| Decisiones relacionadas | [`decisions.md` #4 — máquina de estados en VO](../decisions.md#4--máquina-de-estados-en-value-object), [`decisions.md` #5 — retry + circuit breaker](../decisions.md#5--retry--circuit-breaker-en-adapter-mulesoft) |
 
 ---
 

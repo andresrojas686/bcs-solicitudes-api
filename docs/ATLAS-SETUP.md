@@ -46,7 +46,7 @@ Mientras se crea el cluster, Atlas te muestra un wizard "Connect to Cluster":
    - Esto agrega `0.0.0.0/0`.
 4. Click **Confirm**.
 
-> ⚠️ En un entorno productivo real **nunca** abriríamos `0.0.0.0/0`. Lo correcto sería allowlist de IPs corporativas, VPN o VPC peering. Esto está documentado en `docs/adr/0008-atlas-network-access.md` y en el README como trade-off conocido.
+> ⚠️ En un entorno productivo real **nunca** abriríamos `0.0.0.0/0`. Lo correcto sería allowlist de IPs corporativas, VPN o VPC peering. Documentado en el README como trade-off conocido.
 
 ---
 

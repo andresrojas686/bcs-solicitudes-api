@@ -124,7 +124,7 @@ El QA es **co-dueño del DoD** junto con el dev.
 |---|---|
 | Día 1 | Entorno funcionando: Atlas + backend + frontend. Acceso a repos, Linear, Slack, Sentry. |
 | Día 2 | Primer PR mergeado (typo, doc, o test pequeño). Pair con TL para conocer la arquitectura. |
-| Semana 1 | Pair-programming con un senior. Lee `docs/adr/` y `docs/qa/`. |
+| Semana 1 | Pair-programming con un senior. Lee `docs/decisions.md` y `docs/qa/`. |
 | Semana 2 | Toma una historia pequeña end-to-end. |
 | Mes 1 | Mentor asignado para 1:1 quincenales sobre carrera + crecimiento técnico. |
 
@@ -145,7 +145,7 @@ El QA es **co-dueño del DoD** junto con el dev.
 
 ### 8.1 ADRs
 - Una decisión arquitectónica = un ADR (1 página, formato Michael Nygard).
-- ADRs viven en `docs/adr/NNNN-titulo.md`.
+- Decisiones consolidadas en `docs/decisions.md` (resumen ejecutivo de los 7 ADRs principales).
 - **Estados**: Propuesto → Aceptado → Reemplazado/Obsoleto.
 - ADRs **no se borran**; se reemplazan con un ADR nuevo que cita al anterior.
 
