@@ -1,0 +1,38 @@
+# compiled output
+/dist
+/node_modules
+/build
+
+# logs
+/logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# env (NEVER commit secrets)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests / coverage
+/coverage
+/.nyc_output
+
+# NestJS
+.nest-cache/
+
+# mongodb-memory-server cache
+.cache/
