@@ -61,7 +61,7 @@ flowchart LR
 
 - Node.js 20+
 - pnpm 10+
-- Cluster MongoDB Atlas (free tier M0). Ver [`docs/ATLAS-SETUP.md`](docs/ATLAS-SETUP.md) — setup en ~5 min.
+- Cluster MongoDB Atlas (free tier M0). Ver [§1 del Handbook](docs/HANDBOOK.md#1--setup-de-mongodb-atlas-paso-a-paso) — setup en ~5 min.
 
 ## Inicio rápido
 
@@ -212,4 +212,4 @@ Adicionalmente: contrato Mulesoft en [`openapi/core-banking.yaml`](openapi/core-
 
 Construido como prueba técnica para **BCS — rol Líder Técnico** (Backend + Frontend + QA + Integración + IA aplicada).
 
-**Asistido por IA** en boilerplate, generación de tests exhaustivos, primera redacción de docs y ADRs. Decisiones de arquitectura, code review y firma de ADRs son humanas. Detalle: [`docs/ai-usage/prompts.md`](docs/ai-usage/prompts.md).
+**Asistido por IA** en boilerplate, generación de tests exhaustivos, primera redacción de docs y ADRs. Decisiones de arquitectura, code review y firma de ADRs son humanas. Detalle: [§6 del Handbook](docs/HANDBOOK.md#6--prompts-representativos-usados-con-ia).
