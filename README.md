@@ -4,6 +4,10 @@
 
 [![Node](https://img.shields.io/badge/node-20%2B-brightgreen)]() [![pnpm](https://img.shields.io/badge/pnpm-10-orange)]() [![NestJS](https://img.shields.io/badge/NestJS-10-red)]() [![Tests](https://img.shields.io/badge/tests-46%20unit%2Fint%20%2B%2031%20smoke-success)]()
 
+**Repos hermanos:**
+- 🎨 Frontend: [andresrojas686/bcs-solicitudes-web](https://github.com/andresrojas686/bcs-solicitudes-web)
+- 🧪 Mock Mulesoft: [andresrojas686/bcs-core-mock](https://github.com/andresrojas686/bcs-core-mock)
+
 ## Visión general
 
 Plataforma para que asesores del BCS creen, gestionen y finalicen solicitudes de productos bancarios (cuenta de ahorros, tarjeta de crédito, libre inversión). Incluye:
