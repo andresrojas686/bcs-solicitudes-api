@@ -1,0 +1,91 @@
+name: 🐛 Bug
+description: Reportar un defecto en la plataforma
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar este bug. Por favor incluye **correlationId** del log si lo tienes — es la forma más rápida de reproducir.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidad
+      options:
+        - "S1 - Crítico (plataforma caída / pérdida de datos)"
+        - "S2 - Alto (funcionalidad core rota)"
+        - "S3 - Medio (feature secundaria con workaround)"
+        - "S4 - Bajo (UI minor, typo, enhancement)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridad
+      options:
+        - "P1 - Atender ya"
+        - "P2 - En sprint actual"
+        - "P3 - Próximo sprint"
+        - "P4 - Backlog"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      description: Sé específico — incluye datos (documento del cliente, producto, etc).
+      placeholder: |
+        1. Login como `asesor`.
+        2. POST /solicitudes con cliente `1111111111`, producto `AHO-001`.
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Resultado esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Resultado obtenido
+      description: Pega el response body completo si aplica.
+    validations:
+      required: true
+
+  - type: input
+    id: correlation_id
+    attributes:
+      label: correlationId del log
+      description: Aparece en el response header `x-correlation-id` y en cada log.
+      placeholder: req-abcDEF1234
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Ambiente
+      options:
+        - dev (local)
+        - CI
+        - staging
+        - production
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit SHA
+      description: Útil para localizar la versión exacta.
+      placeholder: abc1234
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidencia
+      description: Adjunta HAR, screenshot, logs estructurados (con `correlationId`).
